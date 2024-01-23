@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_chat_app/ui/theme/app_style.dart';
 import 'package:flutter/material.dart';

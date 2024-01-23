@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
 import 'package:firebase_chat_app/ui/pages/account_screen.dart';
 import 'package:firebase_chat_app/ui/pages/list_screen.dart';

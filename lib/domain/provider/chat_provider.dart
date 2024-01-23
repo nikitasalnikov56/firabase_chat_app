@@ -1,9 +1,5 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_chat_app/domain/model/users.dart';
-
 import 'package:firebase_chat_app/ui/theme/app_colors.dart';
 import 'package:firebase_chat_app/ui/theme/app_style.dart';
 import 'package:flutter/material.dart';
