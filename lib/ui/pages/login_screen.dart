@@ -35,7 +35,7 @@ class LoginScreen extends StatelessWidget {
 
               //email
               TextField(
-                controller: model.userdata.emailController,
+                controller: model.emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -51,7 +51,7 @@ class LoginScreen extends StatelessWidget {
               // password
               TextField(
                 obscureText: true,
-                controller: model.userdata.passwordController,
+                controller: model.passwordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

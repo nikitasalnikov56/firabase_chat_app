@@ -34,7 +34,7 @@ class RegisterScreen extends StatelessWidget {
               const SizedBox(height: 50),
               //name
               TextField(
-                controller: model.userdata.nameController,
+                controller: model.nameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -47,9 +47,24 @@ class RegisterScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
+              //last name
+              TextField(
+                controller: model.lastNameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintText: 'Введите фамилию',
+                  hintStyle: AppStyle.fontStyle.copyWith(
+                    fontSize: 14,
+                    color: AppColors.blackGrey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
               //email
               TextField(
-                controller: model.userdata.emailController,
+                controller: model.emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -65,7 +80,7 @@ class RegisterScreen extends StatelessWidget {
               // password
               TextField(
                 obscureText: true,
-                controller: model.userdata.passwordController,
+                controller: model.passwordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -81,7 +96,7 @@ class RegisterScreen extends StatelessWidget {
               // password confirm
               TextField(
                 obscureText: true,
-                controller: model.userdata.confirmPasswordController,
+                controller: model.confirmPasswordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

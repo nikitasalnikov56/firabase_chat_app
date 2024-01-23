@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_chat_app/domain/model/user_data.dart';
-import 'package:firebase_chat_app/ui/pages/login_screen.dart';
+import 'package:firebase_chat_app/domain/model/users.dart';
+
 import 'package:firebase_chat_app/ui/theme/app_colors.dart';
 import 'package:firebase_chat_app/ui/theme/app_style.dart';
 import 'package:flutter/material.dart';
@@ -9,24 +11,28 @@ import 'package:flutter/material.dart';
 class ChatProvider extends ChangeNotifier {
   //firebase
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+
+  //controllers
+  final nameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   //for toggle screens
   bool showRegisterPage = true;
 
-  //user data
-  final _userData = UserData();
-  UserData get userdata => _userData;
-
+  
   //переключения между экранами
   void toggleScreens() {
     showRegisterPage = !showRegisterPage;
     notifyListeners();
   }
 
+//регистрация
   Future<void> signUp(BuildContext context) async {
-    final email = _userData.emailController.text.trim();
-    final password = _userData.passwordController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
     if (passwordConfirmed() && email != '' && password != '') {
       await _auth
           .createUserWithEmailAndPassword(
@@ -35,8 +41,10 @@ class ChatProvider extends ChangeNotifier {
           )
           .then(
             (value) => addUserDetails(
-              firstName: _userData.nameController.text.trim(),
-              email: email,
+              firstName: nameController.text.trim(),
+              lastName: lastNameController.text.trim(),
+              email: email.toLowerCase(),
+              
             ),
           )
           .then((value) => controllersClear());
@@ -58,46 +66,53 @@ class ChatProvider extends ChangeNotifier {
 
   //проверка совпадения паролей
   bool passwordConfirmed() {
-    if (_userData.passwordController.text.trim() ==
-        _userData.confirmPasswordController.text.trim()) {
+    if (passwordController.text.trim() ==
+        confirmPasswordController.text.trim()) {
       return true;
     } else {
       return false;
     }
   }
 
-  //add user
+  //добавление пользователя
   Future addUserDetails({
     String firstName = '',
+    String lastName = '',
     String email = '',
+ 
   }) async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(_auth.currentUser?.uid)
-        .set({
-      'first_name': capitalize(firstName),
-      'email': email,
-    });
+        .set(
+      {
+        'first_name': capitalize(firstName),
+        'last_name': capitalize(lastName),
+        'email': email,
+        
+      },
+    );
   }
 
   //capitalize Name
-  capitalize(String str) => str[0].toUpperCase() + str.substring(1);
+  capitalize(String str) =>
+      str[0].toUpperCase() + str.substring(1).toLowerCase();
 
   // очистка контроллеров
   controllersClear() {
-    _userData.nameController.clear();
-    _userData.emailController.clear();
-    _userData.passwordController.clear();
-    _userData.confirmPasswordController.clear();
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
   }
 
+  //авторизация с проверкой по емайл
   Future signIn(BuildContext context) async {
     try {
-    
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _userData.emailController.text.trim(),
-        password: _userData.passwordController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
       // Успешная аутентификация
       User? user = userCredential.user;
@@ -106,7 +121,7 @@ class ChatProvider extends ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Пользователя с почтой ${_userData.emailController.text.trim()} не существует',
+            'Пользователя с почтой ${emailController.text.trim()} не существует',
             textAlign: TextAlign.center,
             style: AppStyle.fontStyle.copyWith(
               fontSize: 14,
@@ -117,5 +132,12 @@ class ChatProvider extends ChangeNotifier {
         ),
       );
     }
+  }
+
+  //переключение экранов
+  int indexItem = 0;
+  navbarScreenToggle(int index) {
+    indexItem = index;
+    notifyListeners();
   }
 }
