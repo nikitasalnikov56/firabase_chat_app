@@ -1,9 +1,7 @@
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
-import 'package:firebase_chat_app/ui/routes/app_routes.dart';
 import 'package:firebase_chat_app/ui/theme/app_colors.dart';
 import 'package:firebase_chat_app/ui/theme/app_style.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -37,7 +35,7 @@ class LoginScreen extends StatelessWidget {
 
               //email
               TextField(
-                controller: model.emailController,
+                controller: model.userdata.emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -53,7 +51,7 @@ class LoginScreen extends StatelessWidget {
               // password
               TextField(
                 obscureText: true,
-                controller: model.passwordController,
+                controller: model.userdata.passwordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -72,7 +70,9 @@ class LoginScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gradientBlue1,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    model.signIn(context);
+                  },
                   child: Text(
                     'Войти',
                     style: AppStyle.fontStyle.copyWith(
@@ -101,9 +101,7 @@ class LoginScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomRight,
                 child: TextButton(
-                  onPressed: () {
-                    context.go(AppRoutes.registerScreen);
-                  },
+                  onPressed: showRegisterPage,
                   child: Text(
                     'Нет аккаунта? Зарегистрируйтесь',
                     style: AppStyle.fontStyle

@@ -1,9 +1,7 @@
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
-import 'package:firebase_chat_app/ui/routes/app_routes.dart';
 import 'package:firebase_chat_app/ui/theme/app_colors.dart';
 import 'package:firebase_chat_app/ui/theme/app_style.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -36,7 +34,7 @@ class RegisterScreen extends StatelessWidget {
               const SizedBox(height: 50),
               //name
               TextField(
-                controller: model.nameController,
+                controller: model.userdata.nameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -51,7 +49,7 @@ class RegisterScreen extends StatelessWidget {
               const SizedBox(height: 15),
               //email
               TextField(
-                controller: model.emailController,
+                controller: model.userdata.emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -67,12 +65,28 @@ class RegisterScreen extends StatelessWidget {
               // password
               TextField(
                 obscureText: true,
-                controller: model.passwordController,
+                controller: model.userdata.passwordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   hintText: 'Введите пароль',
+                  hintStyle: AppStyle.fontStyle.copyWith(
+                    fontSize: 14,
+                    color: AppColors.blackGrey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              // password confirm
+              TextField(
+                obscureText: true,
+                controller: model.userdata.confirmPasswordController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintText: 'Повторите пароль',
                   hintStyle: AppStyle.fontStyle.copyWith(
                     fontSize: 14,
                     color: AppColors.blackGrey,
@@ -86,7 +100,9 @@ class RegisterScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gradientBlue1,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    model.signUp(context);
+                  },
                   child: Text(
                     'Зарегистрироваться',
                     style: AppStyle.fontStyle.copyWith(
@@ -100,9 +116,7 @@ class RegisterScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomRight,
                 child: TextButton(
-                  onPressed: () {
-                    context.go(AppRoutes.loginScreen);
-                  },
+                  onPressed: showLoginPage,
                   child: Text(
                     'Уже есть аккаунт? Войдите',
                     style: AppStyle.fontStyle
