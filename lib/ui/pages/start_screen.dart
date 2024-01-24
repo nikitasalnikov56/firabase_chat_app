@@ -1,6 +1,6 @@
 import 'package:firebase_chat_app/ui/routes/app_routes.dart';
-import 'package:firebase_chat_app/ui/theme/app_colors.dart';
-import 'package:firebase_chat_app/ui/theme/app_style.dart';
+import 'package:firebase_chat_app/ui/style/app_colors.dart';
+import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';

@@ -1,6 +1,6 @@
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
-import 'package:firebase_chat_app/ui/theme/app_colors.dart';
-import 'package:firebase_chat_app/ui/theme/app_style.dart';
+import 'package:firebase_chat_app/ui/style/app_colors.dart';
+import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

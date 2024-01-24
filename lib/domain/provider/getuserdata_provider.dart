@@ -13,8 +13,6 @@ class GetUserDataProvider extends ChangeNotifier {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  var gradient;
-
   String userName = '';
   String userLastName = '';
   String email = '';
@@ -25,11 +23,10 @@ class GetUserDataProvider extends ChangeNotifier {
     String? uid = _auth.currentUser?.uid;
     final userDoc = await _firestore.collection('users').doc(uid).get();
     if (userDoc.exists) {
-      userName = userDoc.get('first_name') ?? 'Нет имени';
-      userLastName = userDoc.get('last_name') ?? 'Нет фамилии';
+      userName = userDoc.get('name') ?? 'Нет имени';
+      userLastName = userDoc.get('lastName') ?? 'Нет фамилии';
       email = userDoc.get('email') ?? 'Нет email';
-     
-      
+
       if (userName.isNotEmpty && userLastName.isNotEmpty) {
         nameFirstChar = userName[0];
         lastNameFirstChar = userLastName[0];
@@ -44,7 +41,5 @@ class GetUserDataProvider extends ChangeNotifier {
 //добавление аватарки
   String image = '';
 
-  Future<String> fetchImage() async {
-    return '';
-  }
+ 
 }
