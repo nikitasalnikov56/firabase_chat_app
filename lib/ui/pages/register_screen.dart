@@ -118,10 +118,10 @@ class RegisterScreen extends StatelessWidget {
                   onPressed: () {
                     model.signUp(
                       context,
-                      name: model.nameController.text,
-                      lastName: model.lastNameController.text,
-                      email: model.emailController.text,
-                      password: model.passwordController.text,
+                      name: model.nameController.text.trim(),
+                      lastName: model.lastNameController.text.trim(),
+                      email: model.emailController.text.trim(),
+                      password: model.passwordController.text.trim(),
                     );
                   },
                   child: Text(

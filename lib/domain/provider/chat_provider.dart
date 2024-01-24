@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_chat_app/domain/model/message.dart';
 import 'package:firebase_chat_app/ui/style/app_colors.dart';
 import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +8,8 @@ import 'package:intl/intl.dart';
 
 class ChatProvider extends ChangeNotifier {
   //firebase
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
+  final firestore = FirebaseFirestore.instance;
 
   //controllers
   final nameController = TextEditingController();
@@ -17,9 +18,13 @@ class ChatProvider extends ChangeNotifier {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final searchController = TextEditingController();
+  final messageController = TextEditingController();
 
   //for toggle screens
   bool showRegisterPage = true;
+
+  //для bottomnavbar
+  int indexItem = 0;
 
   //переключения между экранами
   void toggleScreens() {
@@ -28,13 +33,15 @@ class ChatProvider extends ChangeNotifier {
   }
 
 //регистрация
-  Future<User?> signUp(BuildContext context,
-      {String name = '',
-      String lastName = '',
-      String email = '',
-      String password = ''}) async {
+  Future<User?> signUp(
+    BuildContext context, {
+    required String name,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
     try {
-      User? user = (await _auth.createUserWithEmailAndPassword(
+      User? user = (await auth.createUserWithEmailAndPassword(
               email: email, password: password))
           .user;
       if (passwordConfirmed() &&
@@ -44,13 +51,13 @@ class ChatProvider extends ChangeNotifier {
         user.updateDisplayName(name);
 
         DateTime currentTime = DateTime.now();
-
-        await _firestore.collection('users').doc(_auth.currentUser?.uid).set({
+        indexItem = 0;
+        await firestore.collection('users').doc(auth.currentUser?.uid).set({
           'name': capitalize(name),
           'lastName': capitalize(lastName),
           'email': email.toLowerCase(),
           'status': 'Unavalible',
-          'uid': _auth.currentUser?.uid,
+          'uid': auth.currentUser?.uid,
           'lastOnline': currentTime,
         }).then((value) => controllersClear());
         return user;
@@ -68,7 +75,7 @@ class ChatProvider extends ChangeNotifier {
             ),
           ),
         );
-        // return user;
+        return user;
       }
     } catch (e) {
       return null;
@@ -100,15 +107,17 @@ class ChatProvider extends ChangeNotifier {
 
   //авторизация с проверкой по емайл
   Future signIn(BuildContext context) async {
+    navbarScreenToggle(0);
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim(),
-          )
-          .then((value) => controllersClear());
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
       // Успешная аутентификация
       User? user = userCredential.user;
+      controllersClear();
+      return user;
     } catch (_) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,18 +137,23 @@ class ChatProvider extends ChangeNotifier {
   }
 
   //переключение экранов
-  int indexItem = 0;
+
   navbarScreenToggle(int index) {
     indexItem = index;
     notifyListeners();
   }
 
+  QuerySnapshot<Map<String, dynamic>>? userSnapshot;
 //список юзеров
   Future<List<Map<String, dynamic>>?> getAllUsers() async {
+    User? currentuser = auth.currentUser;
+    String currentUserId = currentuser?.uid ?? '';
     try {
-      QuerySnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('users').get();
-      List<Map<String, dynamic>> usersList = userSnapshot.docs
+      userSnapshot = await firestore
+          .collection('users')
+          .where('uid', isNotEqualTo: currentUserId)
+          .get();
+      List<Map<String, dynamic>> usersList = userSnapshot!.docs
           .map((DocumentSnapshot<Map<String, dynamic>> doc) => doc.data()!)
           .toList();
       return usersList;
@@ -152,7 +166,10 @@ class ChatProvider extends ChangeNotifier {
   Map<String, dynamic>? userMap;
 
   Future<void> onSearch() async {
-    await _firestore
+    if (searchController.text.isEmpty) {
+      getAllUsers();
+    }
+    await firestore
         .collection('users')
         .where('name', isEqualTo: searchController.text)
         .get()
@@ -162,8 +179,7 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
-
-//форматирование даты
+//форматирование
   String formatTime(DateTime time) {
     DateTime now = DateTime.now();
     Duration difference = now.difference(time);
@@ -193,6 +209,8 @@ class ChatProvider extends ChangeNotifier {
       return '$user2$user1';
     }
   }
+
+ 
 }
 
 

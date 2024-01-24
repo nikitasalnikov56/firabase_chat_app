@@ -7,11 +7,13 @@ import 'package:provider/provider.dart';
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
     super.key,
+    this.user,
   });
-
+  final Map<String, dynamic>? user;
   @override
   Widget build(BuildContext context) {
     final model = context.watch<GetUserDataProvider>();
+    
     return Container(
       width: 50,
       height: 50,
@@ -29,7 +31,7 @@ class AvatarWidget extends StatelessWidget {
       alignment: Alignment.center,
       child: model.image.isEmpty
           ? Text(
-              '${model.nameFirstChar}${model.lastNameFirstChar}',
+              '${user?['name'][0]}${user?['lastName'][0]}',
               style: AppStyle.fontStyle.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,

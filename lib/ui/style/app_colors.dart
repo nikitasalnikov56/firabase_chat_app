@@ -14,4 +14,5 @@ abstract class AppColors {
   static Color gradientBlue1 = const Color(0xFF00ACF6);
   static Color gradientBlue2 = const Color(0xFF006DED);
   static Color chatGreen = const Color(0xFF3CED78);
+  static Color darkGreen = const Color(0xFF00521C);
 }

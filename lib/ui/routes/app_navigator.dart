@@ -1,3 +1,4 @@
+import 'package:firebase_chat_app/ui/pages/chat_room.dart';
 import 'package:firebase_chat_app/ui/pages/main_screen.dart';
 import 'package:firebase_chat_app/ui/pages/login_screen.dart';
 import 'package:firebase_chat_app/ui/pages/register_screen.dart';
@@ -23,6 +24,10 @@ abstract class AppNavigator {
       GoRoute(
         path: AppRoutes.loginScreen,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.chatRoom,
+        builder: (context, state) => const ChatRoom(),
       ),
     ],
   );

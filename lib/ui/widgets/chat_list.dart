@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
+import 'package:firebase_chat_app/ui/pages/chat_room.dart';
 import 'package:firebase_chat_app/ui/style/app_colors.dart';
 import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:firebase_chat_app/ui/widgets/avatar_widgets.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 class ChatList extends StatelessWidget {
@@ -20,8 +22,20 @@ class ChatList extends StatelessWidget {
         String formattedTime = model.formatTime(lastOnline);
 
         return ListTile(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatRoom(
+                  userId: user['uid'],
+                  userName: user['name'],
+                ),
+              ),
+            );
+          },
           titleAlignment: ListTileTitleAlignment.top,
-          leading: const AvatarWidget(),
+
+          leading: AvatarWidget(user: user),
           title: Text(
             user['name'] + ' ' + user['lastName'],
             style: AppStyle.fontStyle.copyWith(
