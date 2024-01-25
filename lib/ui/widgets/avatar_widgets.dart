@@ -1,3 +1,4 @@
+import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
 import 'package:firebase_chat_app/domain/provider/getuserdata_provider.dart';
 import 'package:firebase_chat_app/ui/style/app_colors.dart';
 import 'package:firebase_chat_app/ui/style/app_style.dart';
@@ -13,7 +14,8 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = context.watch<GetUserDataProvider>();
-    
+    final colorModel = context.watch<ChatProvider>();
+
     return Container(
       width: 50,
       height: 50,
@@ -22,10 +24,7 @@ class AvatarWidget extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColors.gradientOrange1,
-            AppColors.gradientOrange2,
-          ],
+          colors: colorModel.gradientColors ?? [],
         ),
       ),
       alignment: Alignment.center,

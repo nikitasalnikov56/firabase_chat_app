@@ -1,13 +1,13 @@
 // import 'package:firebase_chat_app/domain/model/message.dart';
 // import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_chat_app/domain/model/message.dart';
 import 'package:firebase_chat_app/domain/provider/chat_provider.dart';
 import 'package:firebase_chat_app/domain/services/message_service.dart';
 import 'package:firebase_chat_app/ui/style/app_colors.dart';
-import 'package:firebase_chat_app/ui/style/app_style.dart';
-import 'package:firebase_chat_app/ui/widgets/avatar_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 // class ChatRoom extends StatelessWidget {
@@ -197,9 +197,9 @@ import 'dart:async';
 
 class ChatRoom extends StatefulWidget {
   final String? userId;
-final String? userName;
+  final String? userName;
 
-  const ChatRoom({super.key,  this.userId, this.userName});
+  const ChatRoom({super.key, this.userId, this.userName});
 
   @override
   _ChatRoomState createState() => _ChatRoomState();
@@ -234,30 +234,79 @@ class _ChatRoomState extends State<ChatRoom> {
     final model = context.watch<ChatProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with ${widget.userId}'),
+        title: Text('Chat with ${widget.userName}'),
+        centerTitle: true,
       ),
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: messageStreamController.stream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Message> messages = snapshot.data!;
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      Message message = messages[index];
-                      return ListTile(
-                        title: Text(message.content),
-                        subtitle: Text(message.timestamp.toString()),
-                      );
-                    },
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('messages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
                   );
-                } else {
-                  return CircularProgressIndicator();
                 }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                List<Message> messages =
+                    snapshot.data!.docs.map((DocumentSnapshot document) {
+                  Map<String, dynamic> data =
+                      document.data() as Map<String, dynamic>;
+                  return Message(
+                    senderId: data['senderId'],
+                    receiverId: data['receiverId'],
+                    content: data['content'],
+                    timestamp: (data['timestamp'] as Timestamp).toDate(),
+                  );
+                }).toList();
+                return ListView.separated(
+                  reverse: true,
+                  separatorBuilder: (context, i) => const SizedBox(height: 20),
+                  itemBuilder: (context, i) {
+                    bool isSentMessage =
+                        messages[i].senderId == model.auth.currentUser?.uid;
+
+                    return Align(
+                      alignment: isSentMessage
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 290),
+                        child: Card(
+                          color: isSentMessage
+                              ? AppColors.chatGreen
+                              : AppColors.lightGrey,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(messages[i].content),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    DateFormat('HH:mm')
+                                        .format(messages[i].timestamp),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: messages.length,
+                );
               },
             ),
           ),
@@ -294,8 +343,10 @@ class _ChatRoomState extends State<ChatRoom> {
         receiverId: id ?? '',
         content: messageController.text,
         timestamp: DateTime.now(),
+        isRead: false,
       );
       messageService.sendMessage(message);
+     
       messageController.clear();
     } else {
       print('No user');

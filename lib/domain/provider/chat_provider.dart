@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_chat_app/domain/model/message.dart';
@@ -25,6 +27,21 @@ class ChatProvider extends ChangeNotifier {
 
   //для bottomnavbar
   int indexItem = 0;
+
+  List<List<Color>> colorPairs = [
+    [AppColors.gradientBlue1, AppColors.gradientBlue2],
+    [AppColors.gradientGreen1, AppColors.gradientGreen2],
+    [AppColors.gradientOrange1, AppColors.gradientOrange2],
+  ];
+  List<Color>? gradientColors;
+  //функция выбора случайной пары цветов
+  List<Color> chooseRandomColorPair() {
+    int userIdAsNumber =
+        auth.currentUser!.uid.codeUnits.reduce((a, b) => a + b);
+    int randomIndex = userIdAsNumber % colorPairs.length;
+    // Random().nextInt(colorPairs.length);
+    return colorPairs[randomIndex];
+  }
 
   //переключения между экранами
   void toggleScreens() {
@@ -60,6 +77,7 @@ class ChatProvider extends ChangeNotifier {
           'uid': auth.currentUser?.uid,
           'lastOnline': currentTime,
         }).then((value) => controllersClear());
+        gradientColors = chooseRandomColorPair();
         return user;
       } else {
         // ignore: use_build_context_synchronously
@@ -144,6 +162,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   QuerySnapshot<Map<String, dynamic>>? userSnapshot;
+
 //список юзеров
   Future<List<Map<String, dynamic>>?> getAllUsers() async {
     User? currentuser = auth.currentUser;
@@ -153,9 +172,11 @@ class ChatProvider extends ChangeNotifier {
           .collection('users')
           .where('uid', isNotEqualTo: currentUserId)
           .get();
+
       List<Map<String, dynamic>> usersList = userSnapshot!.docs
           .map((DocumentSnapshot<Map<String, dynamic>> doc) => doc.data()!)
           .toList();
+  
       return usersList;
     } catch (e) {
       return null;
@@ -209,8 +230,6 @@ class ChatProvider extends ChangeNotifier {
       return '$user2$user1';
     }
   }
-
- 
 }
 
 
