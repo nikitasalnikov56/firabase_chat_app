@@ -35,7 +35,8 @@ class ListScreen extends StatelessWidget {
                     thickness: 1,
                   ),
                 ),
-                model.userMap != null
+                model.userMap != null &&
+                        model.searchController.text.trim().toLowerCase() != ''
                     ? Card(
                         color: AppColors.lightGrey,
                         child: SearchedListItem(model: model))

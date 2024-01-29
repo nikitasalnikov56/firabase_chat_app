@@ -18,6 +18,10 @@ class GetUserDataProvider extends ChangeNotifier {
   String email = '';
   String nameFirstChar = '';
   String lastNameFirstChar = '';
+
+  String _otherUserStatus = '';
+  String get otherUserStatus => _otherUserStatus;
+
   //получение данных пользователя
   Future getUserData() async {
     String? uid = _auth.currentUser?.uid;
@@ -32,14 +36,24 @@ class GetUserDataProvider extends ChangeNotifier {
         lastNameFirstChar = userLastName[0];
       }
       notifyListeners();
+
       return userName + userLastName + email;
     } else {
       throw FirebaseException(plugin: 'No such user data');
     }
   }
 
+  Future<String?> getuserStatus(String userId) async {
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    return userDoc.exists ? userDoc.get('status') : null;
+  }
+
+  Future<void> updateStatus(bool isOnline) async {
+    await _firestore.collection('users').doc(_auth.currentUser?.uid).update({
+      'status': isOnline ? 'online' : 'offline',
+    });
+  }
+
 //добавление аватарки
   String image = '';
-
- 
 }

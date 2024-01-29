@@ -1,8 +1,6 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_chat_app/domain/model/message.dart';
+import 'package:firebase_chat_app/domain/services/auth_service.dart';
 import 'package:firebase_chat_app/ui/style/app_colors.dart';
 import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:flutter/material.dart';
@@ -22,27 +20,17 @@ class ChatProvider extends ChangeNotifier {
   final searchController = TextEditingController();
   final messageController = TextEditingController();
 
+  //services
+  final _authService = AuthService();
+
   //for toggle screens
   bool showRegisterPage = true;
 
   //для bottomnavbar
   int indexItem = 0;
 
-  List<List<Color>> colorPairs = [
-    [AppColors.gradientBlue1, AppColors.gradientBlue2],
-    [AppColors.gradientGreen1, AppColors.gradientGreen2],
-    [AppColors.gradientOrange1, AppColors.gradientOrange2],
-  ];
-  List<Color>? gradientColors;
-  //функция выбора случайной пары цветов
-  List<Color> chooseRandomColorPair() {
-    int userIdAsNumber =
-        auth.currentUser!.uid.codeUnits.reduce((a, b) => a + b);
-    int randomIndex = userIdAsNumber % colorPairs.length;
-    // Random().nextInt(colorPairs.length);
-    return colorPairs[randomIndex];
-  }
-
+  //time 
+  DateTime currentTime = DateTime.now();
   //переключения между экранами
   void toggleScreens() {
     showRegisterPage = !showRegisterPage;
@@ -58,26 +46,28 @@ class ChatProvider extends ChangeNotifier {
     required String password,
   }) async {
     try {
-      User? user = (await auth.createUserWithEmailAndPassword(
-              email: email, password: password))
+      User? user = (await _authService.signUpWithEmailandPassword(
+              email.toLowerCase(), password.toLowerCase()))
           .user;
-      if (passwordConfirmed() &&
+      if (_authService.passwordConfirmed(
+              passwordController.text.trim().toLowerCase(),
+              confirmPasswordController.text.trim().toLowerCase()) &&
           email != '' &&
           password != '' &&
           user != null) {
         user.updateDisplayName(name);
 
-        DateTime currentTime = DateTime.now();
+        
         indexItem = 0;
-        await firestore.collection('users').doc(auth.currentUser?.uid).set({
+        await firestore.collection('users').doc(user.uid).set({
           'name': capitalize(name),
           'lastName': capitalize(lastName),
           'email': email.toLowerCase(),
-          'status': 'Unavalible',
-          'uid': auth.currentUser?.uid,
+          'status': 'offline',
+          'uid': user.uid,
           'lastOnline': currentTime,
-        }).then((value) => controllersClear());
-        gradientColors = chooseRandomColorPair();
+        }, SetOptions(merge: true)).then((value) => controllersClear());
+
         return user;
       } else {
         // ignore: use_build_context_synchronously
@@ -100,16 +90,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  //проверка совпадения паролей
-  bool passwordConfirmed() {
-    if (passwordController.text.trim() ==
-        confirmPasswordController.text.trim()) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   //capitalize
   capitalize(String str) =>
       str[0].toUpperCase() + str.substring(1).toLowerCase();
@@ -128,12 +108,13 @@ class ChatProvider extends ChangeNotifier {
     navbarScreenToggle(0);
     try {
       UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+          await _authService.signInWithEmailandPassword(
+        emailController.text.trim().toLowerCase(),
+        passwordController.text.trim().toLowerCase(),
       );
       // Успешная аутентификация
       User? user = userCredential.user;
+  
       controllersClear();
       return user;
     } catch (_) {
@@ -161,35 +142,10 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  QuerySnapshot<Map<String, dynamic>>? userSnapshot;
-
-//список юзеров
-  Future<List<Map<String, dynamic>>?> getAllUsers() async {
-    User? currentuser = auth.currentUser;
-    String currentUserId = currentuser?.uid ?? '';
-    try {
-      userSnapshot = await firestore
-          .collection('users')
-          .where('uid', isNotEqualTo: currentUserId)
-          .get();
-
-      List<Map<String, dynamic>> usersList = userSnapshot!.docs
-          .map((DocumentSnapshot<Map<String, dynamic>> doc) => doc.data()!)
-          .toList();
-  
-      return usersList;
-    } catch (e) {
-      return null;
-    }
-  }
-
   //поиск юзеров
   Map<String, dynamic>? userMap;
 
   Future<void> onSearch() async {
-    if (searchController.text.isEmpty) {
-      getAllUsers();
-    }
     await firestore
         .collection('users')
         .where('name', isEqualTo: searchController.text)
@@ -246,41 +202,8 @@ class ChatProvider extends ChangeNotifier {
 
 
 
-  // await _auth
-  //     .createUserWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     )
-  //     .then(
-  //       (value) => addUserDetails(
-  //         firstName: nameController.text.trim(),
-  //         lastName: lastNameController.text.trim(),
-  //         email: email.toLowerCase(),
-
-  //       ),
-  //     )
-  //     .then((value) => controllersClear());
   
   
   
   
   
-  
-  
-  //добавление пользователя
-  // Future addUserDetails({
-  //   String firstName = '',
-  //   String lastName = '',
-  //   String email = '',
-  // }) async {
-  //   await FirebaseFirestore.instance
-  //       .collection('users')
-  //       .doc(_auth.currentUser?.uid)
-  //       .set(
-  //     {
-  //       'first_name': capitalize(firstName),
-  //       'last_name': capitalize(lastName),
-  //       'email': email,
-  //     },
-  //   );
-  // }

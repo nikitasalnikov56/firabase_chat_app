@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_chat_app/domain/services/auth_service.dart';
 import 'package:firebase_chat_app/ui/style/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_chat_app/domain/provider/getuserdata_provider.dart';
@@ -10,10 +12,7 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => GetUserDataProvider(),
-      child: const AccountWidget(),
-    );
+    return const AccountWidget();
   }
 }
 
@@ -21,11 +20,21 @@ class AccountWidget extends StatelessWidget {
   const AccountWidget({
     super.key,
   });
+  static final _auth = FirebaseAuth.instance;
+  static final _firestore = FirebaseFirestore.instance;
+  static String? status;
+  getStatus() async {
+    final userDoc =
+        await _firestore.collection('users').doc(_auth.currentUser?.uid).get();
+    status = userDoc.get('status');
+  }
 
   @override
   Widget build(BuildContext context) {
+    getStatus();
     final model = context.watch<GetUserDataProvider>();
 
+    final authService = AuthService();
     return Container(
       color: AppColors.white,
       width: MediaQuery.of(context).size.width,
@@ -38,9 +47,9 @@ class AccountWidget extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: IconButton(
               onPressed: () {
-                FirebaseAuth.instance.signOut();
+                authService.logOut();
               },
-              icon: const Icon(Icons.exit_to_app),
+              icon: const Icon(Icons.logout),
             ),
           ),
           const SizedBox(height: 50),
@@ -67,6 +76,7 @@ class AccountWidget extends StatelessWidget {
                 : Image.asset('name'),
           ),
           const SizedBox(height: 20),
+          Text(status.toString()),
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Card(

@@ -24,7 +24,10 @@ class AvatarWidget extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: colorModel.gradientColors ?? [],
+          colors: [
+            AppColors.gradientOrange1,
+            AppColors.gradientOrange2,
+          ],
         ),
       ),
       alignment: Alignment.center,
